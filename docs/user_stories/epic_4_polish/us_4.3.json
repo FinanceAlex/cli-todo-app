@@ -1,0 +1,141 @@
+{
+  "id": "US-4.3",
+  "title": "Task count summary in list output",
+  "epic": {
+    "id": "epic_4",
+    "name": "Polish"
+  },
+  "priority": "low",
+  "phase": "m4_polish",
+  "story": {
+    "as_a": "user",
+    "i_want_to": "see a summary line at the bottom of the task list showing counts",
+    "so_that": "I can quickly see how many tasks are pending vs done at a glance"
+  },
+  "rationale": "A summary line adds polish and utility without complexity. It gives users instant insight into their overall progress without having to count rows manually.",
+  "acceptance_criteria": [
+    {
+      "id": "AC-4.3.1",
+      "description": "After listing tasks, a summary line is printed with correct singular/plural forms: '1 task (1 pending, 0 done)' or '5 tasks (3 pending, 2 done)'.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.3.2",
+      "description": "The summary reflects the current filter: if --pending is used, it says 'Showing {n} pending task(s) ({total} total)'; if --done is used, it says 'Showing {n} completed task(s) ({total} total)'.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.3.3",
+      "description": "The summary line is visually separated from the task table (blank line before it).",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.3.4",
+      "description": "When there are no tasks at all, the empty-state message is shown instead of a summary ('No tasks yet. Add one with: todo add \"your task\"'). No summary line is printed for empty state.",
+      "status": "pending"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-4.3.1",
+      "name": "Summary shows correct counts for mixed list",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing 3 pending and 2 done tasks"
+      ],
+      "steps": [
+        "Run `python todo.py list` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains '5 tasks (3 pending, 2 done)'"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.3.2",
+      "name": "Summary adapts to --pending filter",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing 3 pending and 2 done tasks"
+      ],
+      "steps": [
+        "Run `python todo.py list --pending` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'Showing 3 pending tasks (5 total)'"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.3.3",
+      "name": "Summary adapts to --done filter",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing 3 pending and 2 done tasks"
+      ],
+      "steps": [
+        "Run `python todo.py list --done` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'Showing 2 completed tasks (5 total)'"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.3.4",
+      "name": "Singular form for one task",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing exactly 1 pending task"
+      ],
+      "steps": [
+        "Run `python todo.py list` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains '1 task (1 pending, 0 done)' (singular 'task', not 'tasks')"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.3.5",
+      "name": "Empty list shows friendly message, no summary",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with empty tasks.json ([])"
+      ],
+      "steps": [
+        "Run `python todo.py list` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'No tasks yet'",
+        "stdout does NOT contain '0 tasks'"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.3.6",
+      "name": "Filtered empty result shows message, no summary",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing only pending tasks"
+      ],
+      "steps": [
+        "Run `python todo.py list --done` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'No done tasks.'",
+        "stdout does NOT contain '0 completed tasks'"
+      ],
+      "status": "pending"
+    }
+  ],
+  "technical_notes": [
+    "Count tasks using list comprehension: sum(1 for t in tasks if t['status'] == 'pending')",
+    "Print summary after the table, separated by a blank line",
+    "Use helper for pluralization: f\"{n} {'task' if n == 1 else 'tasks'}\"",
+    "When filter is active, show both filtered count and total count for context",
+    "Skip summary entirely for empty state (no tasks) and filtered empty state (no matching tasks)"
+  ],
+  "dependencies": ["US-3.2"],
+  "estimated_hours": 1
+}

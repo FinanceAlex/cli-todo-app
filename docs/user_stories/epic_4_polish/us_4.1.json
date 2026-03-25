@@ -1,0 +1,192 @@
+{
+  "id": "US-4.1",
+  "title": "Help command and usage message",
+  "epic": {
+    "id": "epic_4",
+    "name": "Polish"
+  },
+  "priority": "medium",
+  "phase": "m4_polish",
+  "story": {
+    "as_a": "user",
+    "i_want_to": "see a help message that explains all available commands and their usage",
+    "so_that": "I can quickly learn or remind myself how to use the app"
+  },
+  "rationale": "Even simple CLI tools benefit from built-in help. Users shouldn't have to search docs or source code to remember the syntax for a command they use infrequently.",
+  "acceptance_criteria": [
+    {
+      "id": "AC-4.1.1",
+      "description": "Running `todo help` displays a usage message listing all commands with descriptions and argument syntax.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.1.2",
+      "description": "The help message includes: add, list, done, delete, edit, help commands with their argument syntax.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.1.3",
+      "description": "The help message shows example usage for add, done, delete, and edit commands.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.1.4",
+      "description": "Running `todo` with no arguments also shows the help message (same as `todo help`), printing to stdout with exit code 0.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.1.5",
+      "description": "Running `todo --help` or `todo -h` produces the same help output with exit code 0.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.1.6",
+      "description": "Running `todo --version` prints the app version (e.g., 'todo v0.1.0') and exits with code 0.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.1.7",
+      "description": "The help text includes the list filter options: '--done', '--pending', '--all'.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.1.8",
+      "description": "Running `todo help <command>` shows detailed usage and examples for that specific command. Running `todo help <unknown>` prints 'Unknown command: {command}. Run `todo help` for available commands.'",
+      "status": "pending"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-4.1.1",
+      "name": "Help command shows all commands",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py help` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'add'",
+        "stdout contains 'list'",
+        "stdout contains 'done'",
+        "stdout contains 'delete'",
+        "stdout contains 'edit'",
+        "stdout contains 'help'",
+        "stdout contains '--done' and '--pending'",
+        "Exit code is 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.1.2",
+      "name": "No arguments shows same help as help command",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py` with HOME=tmp_dir",
+        "Run `python todo.py help` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "Both commands produce identical stdout output",
+        "Both exit with code 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.1.3",
+      "name": "--help and -h flags work",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py --help` with HOME=tmp_dir",
+        "Run `python todo.py -h` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "Both produce the same help output",
+        "Both exit with code 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.1.4",
+      "name": "--version shows version",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py --version` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'todo v'",
+        "Exit code is 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.1.5",
+      "name": "Help includes examples for ID-based commands",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py help` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains at least one example with a numeric ID (e.g., 'todo done 3')",
+        "stdout contains at least one add example (e.g., 'todo add \"Buy groceries\"')"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.1.6",
+      "name": "Per-command help works",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py help add` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains detailed usage for the add command",
+        "stdout contains at least one example",
+        "Exit code is 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.1.7",
+      "name": "Help text stays in sync with registered commands",
+      "type": "unit",
+      "preconditions": [
+        "Access to the command dispatch table and help text"
+      ],
+      "steps": [
+        "Parse the help text output and extract all command names mentioned",
+        "Compare against the set of registered command handler keys"
+      ],
+      "expected_results": [
+        "Every registered command appears in the help text",
+        "No help text references a command that doesn't exist"
+      ],
+      "status": "pending"
+    }
+  ],
+  "technical_notes": [
+    "Define help text as a multi-line string constant",
+    "Match the CLI interface spec from the PRD exactly",
+    "Reuse the same function for 'no args', 'help', '--help', and '-h' paths",
+    "Include per-command help dicts with usage, description, and examples",
+    "Add a sync test to prevent help drift as commands are added",
+    "Define VERSION = '0.1.0' constant, used by both --version and help header"
+  ],
+  "dependencies": ["US-1.4"],
+  "estimated_hours": 1.5
+}

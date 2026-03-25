@@ -1,0 +1,147 @@
+{
+  "id": "US-1.3",
+  "title": "List all tasks",
+  "epic": {
+    "id": "epic_1",
+    "name": "Project Setup and Core"
+  },
+  "priority": "high",
+  "phase": "m1_setup",
+  "story": {
+    "as_a": "user",
+    "i_want_to": "see all my tasks displayed in a formatted table",
+    "so_that": "I can quickly review what I need to do and what I've already done"
+  },
+  "rationale": "Listing tasks is how users interact with the app most frequently. A clear, well-formatted display makes the tool pleasant to use and helps users scan their tasks at a glance.",
+  "acceptance_criteria": [
+    {
+      "id": "AC-1.3.1",
+      "description": "Running `todo list` displays all tasks in a formatted table with columns: ID, Status, Description, Created.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.3.2",
+      "description": "Status is displayed as a visual indicator: '[ ]' for pending, '[x]' for done.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.3.3",
+      "description": "Created date is displayed in a human-readable short format (e.g., '2026-03-25').",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.3.4",
+      "description": "When there are no tasks, the app prints 'No tasks yet. Add one with: todo add \"your task\"'.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.3.5",
+      "description": "Tasks are displayed in order of ID (ascending).",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.3.6",
+      "description": "The table displays a header row ('ID  Status  Description  Created') with a separator line below it.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.3.7",
+      "description": "Descriptions longer than the available terminal width are truncated with '...' to maintain table alignment. Uses shutil.get_terminal_size() to determine available width.",
+      "status": "pending"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-1.3.1",
+      "name": "List tasks shows formatted output",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with tasks.json containing 2 tasks (one pending, one done)"
+      ],
+      "steps": [
+        "Call tasks.list_tasks(storage)"
+      ],
+      "expected_results": [
+        "Returns list of 2 task dicts",
+        "Tasks are sorted by ID ascending"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.3.2",
+      "name": "List empty tasks shows helpful message",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with empty tasks.json ([])"
+      ],
+      "steps": [
+        "Run `python todo.py list` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'No tasks yet'",
+        "stdout contains 'todo add'",
+        "Exit code is 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.3.3",
+      "name": "List displays correct status indicators",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing one pending and one done task"
+      ],
+      "steps": [
+        "Run `python todo.py list` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains '[ ]' for pending task",
+        "stdout contains '[x]' for done task",
+        "Both tasks are displayed"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.3.4",
+      "name": "Table includes header row and separator",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing at least 1 task"
+      ],
+      "steps": [
+        "Run `python todo.py list` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "First line of output contains column headers (ID, Status, Description, Created)",
+        "Second line contains a separator (e.g., dashes)"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.3.5",
+      "name": "Long descriptions are truncated",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing a task with a 200-character description"
+      ],
+      "steps": [
+        "Run `python todo.py list` with HOME=tmp_dir in a terminal with 80-column width"
+      ],
+      "expected_results": [
+        "Description is truncated with '...'",
+        "Table alignment is preserved"
+      ],
+      "status": "pending"
+    }
+  ],
+  "technical_notes": [
+    "Format output using string formatting (f-strings) with fixed-width columns",
+    "Always display header row + separator line",
+    "Use shutil.get_terminal_size() to detect terminal width for truncation",
+    "Truncate descriptions: desc[:max_width-3] + '...' when exceeding available space",
+    "Date formatting: task['created_at'][:10] gives YYYY-MM-DD from ISO format",
+    "For Unicode/emoji width issues: document as known limitation for v1, can use wcwidth library later"
+  ],
+  "dependencies": ["US-1.1"],
+  "estimated_hours": 2
+}

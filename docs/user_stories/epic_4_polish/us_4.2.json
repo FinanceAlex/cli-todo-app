@@ -1,0 +1,245 @@
+{
+  "id": "US-4.2",
+  "title": "Robust error handling for all commands",
+  "epic": {
+    "id": "epic_4",
+    "name": "Polish"
+  },
+  "priority": "medium",
+  "phase": "m4_polish",
+  "story": {
+    "as_a": "user",
+    "i_want_to": "see clear, helpful error messages when I make a mistake",
+    "so_that": "I know what went wrong and how to fix it instead of seeing a Python traceback"
+  },
+  "rationale": "Unhandled exceptions and cryptic tracebacks make a tool feel broken and unprofessional. Good error messages turn mistakes into learning moments and keep users confident in the tool.",
+  "acceptance_criteria": [
+    {
+      "id": "AC-4.2.1",
+      "description": "Passing a non-numeric ID to done/delete/edit prints 'Error: Task ID must be a positive number.' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.2.2",
+      "description": "Passing zero or a negative ID to done/delete/edit prints 'Error: Task ID must be a positive number.' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.2.3",
+      "description": "If tasks.json contains invalid JSON, the app prints 'Error: Task file is corrupted. Please check ~/.todo/tasks.json' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.2.4",
+      "description": "No Python tracebacks are ever shown to the user under normal usage.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.2.5",
+      "description": "All error messages are printed to stderr (not stdout) and follow the format 'Error: <message>'.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.2.6",
+      "description": "Missing argument errors include the correct usage hint on the next line (e.g., 'Error: Please provide a task description.\\nUsage: todo add <description>').",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.2.7",
+      "description": "If the tasks file or its directory cannot be read or written due to permissions, the app prints 'Error: Cannot access ~/.todo/tasks.json — check file permissions.' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.2.8",
+      "description": "If writing the tasks file fails due to disk full or I/O error, the app prints 'Error: Could not save tasks. Check disk space and permissions.' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.2.9",
+      "description": "Running an unknown command (e.g., `todo foobar`) prints 'Error: Unknown command \"foobar\". Run `todo help` for usage.' to stderr and exits with code 1. If the command is within edit distance 2 of a known command, suggests it.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.2.10",
+      "description": "The entry point catches all unexpected exceptions and prints 'Error: An unexpected error occurred: {message}' to stderr and exits with code 1. KeyboardInterrupt exits silently with code 130.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-4.2.11",
+      "description": "Extra unexpected arguments to commands are silently ignored (e.g., `todo done 3 extra junk` processes ID 3 only).",
+      "status": "pending"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-4.2.1",
+      "name": "Non-numeric ID shows helpful error",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py done abc` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Error: Task ID must be a positive number.'",
+        "Exit code is 1",
+        "No Python traceback in output"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.2.2",
+      "name": "Corrupted JSON file shows helpful error",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing invalid JSON (e.g., '{broken')"
+      ],
+      "steps": [
+        "Run `python todo.py list` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'corrupted'",
+        "Exit code is 1",
+        "No Python traceback"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.2.3",
+      "name": "Missing description for add shows usage hint",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py add` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Error'",
+        "stderr contains 'description'",
+        "stderr contains 'Usage: todo add'",
+        "Exit code is 1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.2.4",
+      "name": "Missing ID for delete shows usage hint",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py delete` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Error'",
+        "stderr contains 'task ID'",
+        "stderr contains 'Usage: todo delete'",
+        "Exit code is 1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.2.5",
+      "name": "Missing ID for done shows usage hint",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py done` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Error: Please provide a task ID.'",
+        "stderr contains 'Usage: todo done <id>'",
+        "Exit code is 1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.2.6",
+      "name": "Missing arguments for edit shows usage hint",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py edit` with HOME=tmp_dir",
+        "Run `python todo.py edit 3` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "First: stderr contains 'Error' and 'Usage: todo edit <id> <description>'",
+        "Second: stderr contains 'Error' and 'Usage: todo edit <id> <description>'",
+        "Both exit with code 1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.2.7",
+      "name": "Zero and negative IDs show error",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py done 0` with HOME=tmp_dir",
+        "Run `python todo.py delete -5` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "Both stderr contain 'Error: Task ID must be a positive number.'",
+        "Both exit with code 1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.2.8",
+      "name": "Unknown command shows error with suggestion",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py foobar` with HOME=tmp_dir",
+        "Run `python todo.py lst` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "First: stderr contains 'Unknown command \"foobar\"'",
+        "Second: stderr contains 'Did you mean: list?'",
+        "Both exit with code 1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-4.2.9",
+      "name": "Permission error shows user-friendly message",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json set to read-only (chmod 444)"
+      ],
+      "steps": [
+        "Run `python todo.py add 'Test'` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'permissions'",
+        "Exit code is 1",
+        "No Python traceback"
+      ],
+      "status": "pending"
+    }
+  ],
+  "technical_notes": [
+    "Wrap main() in try/except to catch unexpected errors gracefully",
+    "Use print(..., file=sys.stderr) for error output",
+    "Validate ID conversion with try/except ValueError around int(), then check > 0",
+    "Catch json.JSONDecodeError when loading tasks.json",
+    "Catch PermissionError and OSError for file system errors",
+    "Each command handler should validate its own required arguments",
+    "All error messages follow format: 'Error: <message>' optionally followed by 'Usage: ...'",
+    "Catch KeyboardInterrupt at the top level; exit with sys.exit(130)",
+    "Use difflib.get_close_matches for command suggestions"
+  ],
+  "dependencies": ["US-1.4", "US-2.1", "US-2.2", "US-3.1"],
+  "estimated_hours": 2
+}

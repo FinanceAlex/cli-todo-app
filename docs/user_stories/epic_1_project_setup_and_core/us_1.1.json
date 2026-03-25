@@ -1,0 +1,177 @@
+{
+  "id": "US-1.1",
+  "title": "Initialize storage on first use",
+  "epic": {
+    "id": "epic_1",
+    "name": "Project Setup and Core"
+  },
+  "priority": "high",
+  "phase": "m1_setup",
+  "story": {
+    "as_a": "user",
+    "i_want_to": "have the app automatically create its storage directory and file on first use",
+    "so_that": "I don't have to manually set up anything before using the todo app"
+  },
+  "rationale": "A frictionless first-run experience is critical for a CLI tool. If the user has to manually create directories or files before using the app, they may give up or make mistakes. Auto-initialization ensures the app just works out of the box.",
+  "acceptance_criteria": [
+    {
+      "id": "AC-1.1.1",
+      "description": "When the app runs for the first time and ~/.todo/ does not exist, it creates the directory automatically.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.1.2",
+      "description": "When ~/.todo/ exists but tasks.json does not, the app creates tasks.json with an empty JSON array [].",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.1.3",
+      "description": "When ~/.todo/tasks.json already exists, the app reads it without overwriting.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.1.4",
+      "description": "The storage initialization runs before any command is executed, so all commands can assume the file exists.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.1.5",
+      "description": "On first-run initialization (when ~/.todo/ is created), the app prints 'Initialized task storage at ~/.todo/tasks.json' to stderr so it does not interfere with piped stdout.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.1.6",
+      "description": "If tasks.json exists but contains invalid JSON, the app prints 'Error: Task file is corrupted. Please check ~/.todo/tasks.json' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.1.7",
+      "description": "If ~/.todo/ or tasks.json cannot be created or read due to permission errors, the app prints 'Error: Cannot access ~/.todo/. Check directory permissions.' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.1.8",
+      "description": "Writes to tasks.json use a write-then-rename pattern (write to a temporary file, then atomically rename) to prevent data corruption from partial writes or disk-full scenarios.",
+      "status": "pending"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-1.1.1",
+      "name": "Creates ~/.todo directory when missing",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir = create temporary directory",
+        "storage_path = os.path.join(tmp_dir, '.todo', 'tasks.json')",
+        "~/.todo does not exist in tmp_dir"
+      ],
+      "steps": [
+        "Call storage.initialize(base_dir=tmp_dir)"
+      ],
+      "expected_results": [
+        "Directory tmp_dir/.todo/ exists",
+        "File tmp_dir/.todo/tasks.json exists",
+        "File contents are '[]'",
+        "Returns indication that this was a first-run initialization"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.1.2",
+      "name": "Creates tasks.json when directory exists but file is missing",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir = create temporary directory",
+        "Create tmp_dir/.todo/ directory manually",
+        "tasks.json does not exist"
+      ],
+      "steps": [
+        "Call storage.initialize(base_dir=tmp_dir)"
+      ],
+      "expected_results": [
+        "File tmp_dir/.todo/tasks.json exists",
+        "File contents are '[]'"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.1.3",
+      "name": "Does not overwrite existing tasks.json",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir = create temporary directory",
+        "Create tmp_dir/.todo/tasks.json with content '[{\"id\": 1, \"description\": \"existing\"}]'"
+      ],
+      "steps": [
+        "Call storage.initialize(base_dir=tmp_dir)"
+      ],
+      "expected_results": [
+        "File contents still contain the existing task",
+        "No data loss"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.1.4",
+      "name": "Corrupted tasks.json shows user-friendly error",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir = create temporary directory",
+        "Create tmp_dir/.todo/tasks.json with content '{broken json'"
+      ],
+      "steps": [
+        "Call storage.load(base_dir=tmp_dir)"
+      ],
+      "expected_results": [
+        "Raises a handled error (not raw JSONDecodeError)",
+        "Error message contains 'corrupted'"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.1.5",
+      "name": "Permission error shows user-friendly message",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir = create temporary directory",
+        "Create tmp_dir/.todo/ with read-only permissions (chmod 444)"
+      ],
+      "steps": [
+        "Call storage.initialize(base_dir=tmp_dir)"
+      ],
+      "expected_results": [
+        "Raises a handled error (not raw PermissionError)",
+        "Error message contains 'permissions'"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.1.6",
+      "name": "Atomic write prevents corruption on failure",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with existing tasks.json containing valid data"
+      ],
+      "steps": [
+        "Call storage.save() with data that triggers a write failure (e.g., mock disk full)"
+      ],
+      "expected_results": [
+        "Original tasks.json remains intact",
+        "No partial write left behind"
+      ],
+      "status": "pending"
+    }
+  ],
+  "technical_notes": [
+    "Storage module: todo/storage.py",
+    "Use os.makedirs(path, exist_ok=True) for directory creation",
+    "Use os.path.expanduser('~') to resolve home directory",
+    "Storage path: ~/.todo/tasks.json",
+    "Accept optional base_dir parameter for testing (defaults to home dir)",
+    "Use tempfile.NamedTemporaryFile + os.replace() for atomic writes",
+    "Catch PermissionError and json.JSONDecodeError with user-friendly messages",
+    "Print initialization message to stderr (print(..., file=sys.stderr))"
+  ],
+  "dependencies": [],
+  "estimated_hours": 1.5
+}

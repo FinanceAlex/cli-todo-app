@@ -1,0 +1,203 @@
+{
+  "id": "US-1.4",
+  "title": "CLI entry point and command routing",
+  "epic": {
+    "id": "epic_1",
+    "name": "Project Setup and Core"
+  },
+  "priority": "high",
+  "phase": "m1_setup",
+  "story": {
+    "as_a": "user",
+    "i_want_to": "type commands like `todo add` or `todo list` and have the app route to the right action",
+    "so_that": "I have a consistent and intuitive interface for all operations"
+  },
+  "rationale": "A clean CLI entry point with proper command routing is the backbone of the app. It determines the user experience for every interaction. Getting this right early means all future commands plug in easily.",
+  "acceptance_criteria": [
+    {
+      "id": "AC-1.4.1",
+      "description": "The app is invoked via `python todo.py <command> [args]`.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.4.2",
+      "description": "Running `python todo.py` with no arguments prints the help/usage message to stdout and exits with code 0.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.4.3",
+      "description": "Running `python todo.py unknowncommand` prints 'Error: Unknown command: unknowncommand' to stderr, followed by the usage message to stdout, and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.4.4",
+      "description": "The app returns exit code 0 on success and exit code 1 on error.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.4.5",
+      "description": "Storage is initialized before any command handler is called.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.4.6",
+      "description": "All success/informational output goes to stdout. All error output goes to stderr.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.4.7",
+      "description": "Running `todo help` prints the same usage message as running `todo` with no arguments, and exits with code 0.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.4.8",
+      "description": "Running `todo --help` or `todo -h` prints the same usage message and exits with code 0.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.4.9",
+      "description": "Running `todo --version` prints the app version (e.g., 'todo v0.1.0') and exits with code 0.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.4.10",
+      "description": "When an unknown command is entered and it is within edit distance 2 of a known command, the error message suggests the closest match: 'Error: Unknown command: lst. Did you mean: list?'",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.4.11",
+      "description": "The entry point wraps all command execution in a try/except. Unexpected errors print 'Error: An unexpected error occurred: {message}' to stderr and exit with code 1. KeyboardInterrupt (Ctrl+C) exits silently with code 130.",
+      "status": "pending"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-1.4.1",
+      "name": "No arguments shows help",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'Usage: todo <command>'",
+        "Exit code is 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.4.2",
+      "name": "Unknown command shows error to stderr and help to stdout",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py foobar` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Error: Unknown command: foobar'",
+        "stdout contains usage message",
+        "Exit code is 1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.4.3",
+      "name": "todo help produces same output as no arguments",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py help` with HOME=tmp_dir",
+        "Run `python todo.py` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "Both produce identical stdout output",
+        "Both exit with code 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.4.4",
+      "name": "--help and -h flags work",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py --help` with HOME=tmp_dir",
+        "Run `python todo.py -h` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "Both produce the same help output as `todo help`",
+        "Both exit with code 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.4.5",
+      "name": "--version shows version string",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py --version` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'todo v'",
+        "Exit code is 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.4.6",
+      "name": "Similar command suggests correction",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py lst` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Did you mean: list?'",
+        "Exit code is 1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.4.7",
+      "name": "Ctrl+C exits cleanly",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Send SIGINT to the process during execution"
+      ],
+      "expected_results": [
+        "Process exits with code 130",
+        "No traceback shown"
+      ],
+      "status": "pending"
+    }
+  ],
+  "technical_notes": [
+    "Entry point: todo.py at project root",
+    "Use sys.argv[1] for command, sys.argv[2:] for arguments",
+    "Command routing via dict dispatch for extensibility",
+    "Import storage and tasks modules",
+    "Keep main() function clean — delegate to handler functions",
+    "Check for --help, -h, --version before command routing",
+    "For 'did you mean' suggestions: use difflib.get_close_matches(cmd, known_commands, n=1, cutoff=0.6)",
+    "Wrap everything in try/except Exception for clean error handling; catch KeyboardInterrupt separately",
+    "Define VERSION = '0.1.0' as a constant"
+  ],
+  "dependencies": ["US-1.1"],
+  "estimated_hours": 2
+}

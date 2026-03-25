@@ -1,0 +1,214 @@
+{
+  "id": "US-3.1",
+  "title": "Edit a task description",
+  "epic": {
+    "id": "epic_3",
+    "name": "Edit and Filtering"
+  },
+  "priority": "medium",
+  "phase": "m3_edit_filter",
+  "story": {
+    "as_a": "user",
+    "i_want_to": "update the description of an existing task",
+    "so_that": "I can fix typos or refine what a task means without deleting and re-adding it"
+  },
+  "rationale": "Typos happen, and task scope evolves. Forcing users to delete and re-create a task just to fix wording is clunky and loses the original creation timestamp and status. An edit command keeps the workflow smooth.",
+  "acceptance_criteria": [
+    {
+      "id": "AC-3.1.1",
+      "description": "Running `todo edit 3 \"Updated description\"` changes the description of task id=3.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.1.2",
+      "description": "The task's id, status, created_at, and completed_at fields are not modified by edit. The updated_at field is set to the current ISO 8601 timestamp.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.1.3",
+      "description": "The app prints 'Updated task {id}: \"{old_description}\" -> \"{new_description}\"' to stdout, showing both old and new values.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.1.4",
+      "description": "If the task ID does not exist, the app prints 'Error: Task {id} not found.' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.1.5",
+      "description": "Running `todo edit 3` without a new description prints 'Error: Please provide a new description. Usage: todo edit <id> <description>' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.1.6",
+      "description": "Running `todo edit` without any arguments prints 'Error: Please provide a task ID and new description. Usage: todo edit <id> <description>' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.1.7",
+      "description": "If the new description is empty or contains only whitespace, the app prints 'Error: Description cannot be empty.' to stderr and exits with code 1 without modifying the task.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.1.8",
+      "description": "If the new description is identical to the current description, the app prints 'No changes made — description is already: {description}' to stdout and exits with code 0.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.1.9",
+      "description": "If the target task has status 'done', the app prints a warning 'Warning: Task {id} is already completed.' to stderr but still applies the edit.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.1.10",
+      "description": "If the provided ID is not a positive integer, the app prints 'Error: Task ID must be a positive number.' to stderr and exits with code 1.",
+      "status": "pending"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-3.1.1",
+      "name": "Edit updates description and preserves other fields",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1, description='Old text', status='pending', created_at='2026-03-25T10:00:00'"
+      ],
+      "steps": [
+        "Call tasks.edit(storage, 1, 'New text')"
+      ],
+      "expected_results": [
+        "Task description is now 'New text'",
+        "Task status is still 'pending'",
+        "Task created_at is still '2026-03-25T10:00:00'",
+        "Task updated_at is set to current timestamp",
+        "Change is persisted to tasks.json"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-3.1.2",
+      "name": "Edit non-existent task returns error",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1"
+      ],
+      "steps": [
+        "Call tasks.edit(storage, 99, 'New text')"
+      ],
+      "expected_results": [
+        "Raises ValueError or returns error indicating task not found"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-3.1.3",
+      "name": "CLI edit command end-to-end",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1 'Buy groceries'"
+      ],
+      "steps": [
+        "Run `python todo.py edit 1 'Buy groceries and snacks'` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'Updated task 1: \"Buy groceries\" -> \"Buy groceries and snacks\"'",
+        "Exit code is 0",
+        "tasks.json shows updated description"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-3.1.4",
+      "name": "Empty description is rejected",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1 'Buy groceries'"
+      ],
+      "steps": [
+        "Run `python todo.py edit 1 '   '` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Error: Description cannot be empty.'",
+        "Exit code is 1",
+        "tasks.json unchanged"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-3.1.5",
+      "name": "Same description shows no-change message",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1 'Buy groceries'"
+      ],
+      "steps": [
+        "Run `python todo.py edit 1 'Buy groceries'` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'No changes made'",
+        "Exit code is 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-3.1.6",
+      "name": "Multi-word description without quotes works",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1 'Buy groceries'"
+      ],
+      "steps": [
+        "Run `python todo.py edit 1 Buy groceries and snacks` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "Description updated to 'Buy groceries and snacks'",
+        "Exit code is 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-3.1.7",
+      "name": "Editing a completed task shows warning",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1, status='done'"
+      ],
+      "steps": [
+        "Run `python todo.py edit 1 'Updated text'` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Warning: Task 1 is already completed.'",
+        "stdout contains 'Updated task 1'",
+        "Exit code is 0",
+        "Description is updated in tasks.json"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-3.1.8",
+      "name": "Non-numeric ID shows error",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py edit abc 'New text'` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Error: Task ID must be a positive number.'",
+        "Exit code is 1"
+      ],
+      "status": "pending"
+    }
+  ],
+  "technical_notes": [
+    "CLI args: sys.argv[2] is the ID, ' '.join(sys.argv[3:]) is the new description",
+    "This allows multi-word descriptions without requiring quotes in some shells",
+    "Find task by ID, update description field, set updated_at, save back to file",
+    "Strip whitespace from new description before validation",
+    "Add 'updated_at' field to data model (nullable, set on edit)",
+    "All error messages to stderr, all success messages to stdout"
+  ],
+  "dependencies": ["US-1.2"],
+  "estimated_hours": 1.5
+}

@@ -1,0 +1,204 @@
+{
+  "id": "US-3.2",
+  "title": "Filter tasks by status",
+  "epic": {
+    "id": "epic_3",
+    "name": "Edit and Filtering"
+  },
+  "priority": "medium",
+  "phase": "m3_edit_filter",
+  "story": {
+    "as_a": "user",
+    "i_want_to": "filter my task list to show only pending or only completed tasks",
+    "so_that": "I can focus on what's left to do or review what I've accomplished"
+  },
+  "rationale": "As the task list grows, showing everything at once becomes noisy. Filtering lets users see exactly what they need — pending tasks when planning their day, or done tasks when reviewing progress.",
+  "acceptance_criteria": [
+    {
+      "id": "AC-3.2.1",
+      "description": "Running `todo list --pending` shows only tasks with status 'pending'.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.2.2",
+      "description": "Running `todo list --done` shows only tasks with status 'done'.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.2.3",
+      "description": "Running `todo list` (no filter) continues to show all tasks.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.2.4",
+      "description": "When a filter returns no results, the app prints 'No {pending|done} tasks. Run `todo list` to see all tasks.' instead of an empty table.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.2.5",
+      "description": "The list header/format is consistent whether filtered or not.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.2.6",
+      "description": "If both --done and --pending flags are provided, the app prints 'Error: Cannot use --done and --pending together. Use `todo list` to see all tasks.' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.2.7",
+      "description": "If an unrecognized flag is passed (e.g., `todo list --completed`), the app prints 'Error: Unknown option \"--completed\". Available filters: --done, --pending' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.2.8",
+      "description": "Running `todo list --all` is accepted as a synonym for `todo list` with no filter, showing all tasks.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-3.2.9",
+      "description": "When a filter is active, the summary line includes context about total tasks: e.g., 'Showing 2 pending tasks (5 total).'",
+      "status": "pending"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-3.2.1",
+      "name": "Filter pending shows only pending tasks",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with tasks.json containing 2 pending and 1 done task"
+      ],
+      "steps": [
+        "Call tasks.list_tasks(storage, status_filter='pending')"
+      ],
+      "expected_results": [
+        "Returns list of 2 tasks",
+        "All returned tasks have status 'pending'"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-3.2.2",
+      "name": "Filter done shows only completed tasks",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with tasks.json containing 2 pending and 1 done task"
+      ],
+      "steps": [
+        "Call tasks.list_tasks(storage, status_filter='done')"
+      ],
+      "expected_results": [
+        "Returns list of 1 task",
+        "Returned task has status 'done'"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-3.2.3",
+      "name": "Filter with no matching tasks shows helpful message",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing only pending tasks"
+      ],
+      "steps": [
+        "Run `python todo.py list --done` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'No done tasks.'",
+        "stdout contains 'todo list'",
+        "Exit code is 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-3.2.4",
+      "name": "No filter shows all tasks",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing 2 pending and 1 done task"
+      ],
+      "steps": [
+        "Run `python todo.py list` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout shows all 3 tasks",
+        "Exit code is 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-3.2.5",
+      "name": "Conflicting flags show error",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing tasks"
+      ],
+      "steps": [
+        "Run `python todo.py list --done --pending` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Error: Cannot use --done and --pending together.'",
+        "Exit code is 1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-3.2.6",
+      "name": "Unknown flag shows error with available options",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing tasks"
+      ],
+      "steps": [
+        "Run `python todo.py list --completed` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Error: Unknown option'",
+        "stderr contains '--done' and '--pending'",
+        "Exit code is 1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-3.2.7",
+      "name": "--all flag shows all tasks",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing 2 pending and 1 done task"
+      ],
+      "steps": [
+        "Run `python todo.py list --all` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout shows all 3 tasks",
+        "Exit code is 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-3.2.8",
+      "name": "Filtered list shows total context in summary",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing 3 pending and 2 done tasks"
+      ],
+      "steps": [
+        "Run `python todo.py list --pending` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'Showing 3 pending tasks (5 total)'"
+      ],
+      "status": "pending"
+    }
+  ],
+  "technical_notes": [
+    "Add optional status_filter parameter to list_tasks function",
+    "Parse --pending, --done, and --all flags from sys.argv",
+    "Validate that no unknown flags (strings starting with --) are passed",
+    "Filter: [t for t in tasks if t['status'] == filter] when filter is set",
+    "This extends US-1.3 list functionality — modify, don't duplicate",
+    "Update help text to show filter options: 'list [--done|--pending|--all]'"
+  ],
+  "dependencies": ["US-1.3"],
+  "estimated_hours": 1.5
+}

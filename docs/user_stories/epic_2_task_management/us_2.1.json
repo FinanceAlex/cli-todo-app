@@ -1,0 +1,219 @@
+{
+  "id": "US-2.1",
+  "title": "Mark a task as done",
+  "epic": {
+    "id": "epic_2",
+    "name": "Task Management"
+  },
+  "priority": "high",
+  "phase": "m2_management",
+  "story": {
+    "as_a": "user",
+    "i_want_to": "mark a task as completed by its ID",
+    "so_that": "I can track my progress and see what I've accomplished"
+  },
+  "rationale": "Completing tasks is the core feedback loop of a todo app. Without it, the list only grows and becomes discouraging. Marking tasks done gives users a sense of accomplishment and keeps the list meaningful.",
+  "acceptance_criteria": [
+    {
+      "id": "AC-2.1.1",
+      "description": "Running `todo done 3` changes the status of task with id=3 from 'pending' to 'done'.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.1.2",
+      "description": "The completed_at field is set to the current ISO 8601 timestamp when a task is marked done.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.1.3",
+      "description": "The app prints 'Completed task {id}: {description}' to stdout.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.1.4",
+      "description": "If the task ID does not exist, the app prints 'Error: Task {id} not found.' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.1.5",
+      "description": "If the task is already done, the app prints 'Task {id} is already completed.' to stdout and exits with code 0.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.1.6",
+      "description": "Running `todo done` without an ID prints 'Error: Please provide a task ID. Usage: todo done <id>' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.1.7",
+      "description": "If the provided ID is not a positive integer (e.g., 'abc', '0', '-5', '3.5'), the app prints 'Error: Task ID must be a positive number.' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.1.8",
+      "description": "If more than one ID is provided (e.g., `todo done 1 2 3`), only the first ID is processed. Extra arguments are ignored.",
+      "status": "pending"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-2.1.1",
+      "name": "Mark pending task as done",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1, status='pending'"
+      ],
+      "steps": [
+        "Call tasks.complete(storage, 1)"
+      ],
+      "expected_results": [
+        "Task status is now 'done'",
+        "completed_at is a valid ISO 8601 timestamp",
+        "Change is persisted to tasks.json"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.1.2",
+      "name": "Complete non-existent task returns error",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1"
+      ],
+      "steps": [
+        "Call tasks.complete(storage, 99)"
+      ],
+      "expected_results": [
+        "Raises ValueError or returns error indicating task not found"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.1.3",
+      "name": "Complete already-done task is idempotent",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1, status='done', completed_at='2026-03-25T10:00:00'"
+      ],
+      "steps": [
+        "Call tasks.complete(storage, 1)"
+      ],
+      "expected_results": [
+        "Returns indication that task is already completed",
+        "completed_at is not changed (still '2026-03-25T10:00:00')"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.1.4",
+      "name": "CLI done command end-to-end",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing pending task id=1"
+      ],
+      "steps": [
+        "Run `python todo.py done 1` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'Completed task 1'",
+        "Exit code is 0",
+        "tasks.json shows task 1 as done"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.1.5",
+      "name": "Already-done task shows informational message",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1, status='done'"
+      ],
+      "steps": [
+        "Run `python todo.py done 1` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'Task 1 is already completed.'",
+        "Exit code is 0"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.1.6",
+      "name": "Non-numeric ID shows error",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py done abc` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Error: Task ID must be a positive number.'",
+        "Exit code is 1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.1.7",
+      "name": "Zero and negative IDs show error",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py done 0` with HOME=tmp_dir",
+        "Run `python todo.py done -5` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "Both print 'Error: Task ID must be a positive number.' to stderr",
+        "Both exit with code 1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.1.8",
+      "name": "Missing ID shows usage hint",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py done` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Error: Please provide a task ID.'",
+        "stderr contains 'Usage: todo done <id>'",
+        "Exit code is 1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.1.9",
+      "name": "Very large task ID returns not-found error gracefully",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1"
+      ],
+      "steps": [
+        "Run `python todo.py done 999999999` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Error: Task 999999999 not found.'",
+        "Exit code is 1",
+        "No crash or hang"
+      ],
+      "status": "pending"
+    }
+  ],
+  "technical_notes": [
+    "Find task by iterating task list and matching id",
+    "ID from CLI args comes as string — convert to int with validation",
+    "Validate ID is positive integer before lookup (try int(), check > 0)",
+    "Update both status and completed_at fields",
+    "Save entire task list back to file after modification",
+    "All error messages to stderr, all success messages to stdout",
+    "Future enhancement: consider `todo undone <id>` to reopen tasks (out of scope for v1)"
+  ],
+  "dependencies": ["US-1.2"],
+  "estimated_hours": 1.5
+}

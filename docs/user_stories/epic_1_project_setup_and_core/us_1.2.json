@@ -1,0 +1,197 @@
+{
+  "id": "US-1.2",
+  "title": "Add a new task",
+  "epic": {
+    "id": "epic_1",
+    "name": "Project Setup and Core"
+  },
+  "priority": "high",
+  "phase": "m1_setup",
+  "story": {
+    "as_a": "user",
+    "i_want_to": "add a new task by typing a command with a description",
+    "so_that": "I can capture things I need to do without leaving the terminal"
+  },
+  "rationale": "Adding tasks is the foundational action of a todo app. Without it, no other features are useful. The add command must be simple and provide clear feedback so users know their task was saved.",
+  "acceptance_criteria": [
+    {
+      "id": "AC-1.2.1",
+      "description": "Running `todo add \"Buy groceries\"` creates a new task with description 'Buy groceries'.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.2.2",
+      "description": "The new task is assigned a unique integer ID that is one greater than the highest existing ID (or 1 if no tasks exist). IDs are never reused even after deletion.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.2.3",
+      "description": "The new task has status 'pending'.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.2.4",
+      "description": "The new task has a created_at field set to the current ISO 8601 timestamp.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.2.5",
+      "description": "The new task has completed_at set to null.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.2.6",
+      "description": "The task is persisted to ~/.todo/tasks.json immediately using the atomic write pattern.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.2.7",
+      "description": "The app prints a confirmation message to stdout: 'Added task {id}: {description}'.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.2.8",
+      "description": "Running `todo add` without a description prints 'Error: Please provide a task description.' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.2.9",
+      "description": "Running `todo add` with a whitespace-only description prints 'Error: Task description cannot be empty.' to stderr and exits with code 1. Descriptions are stripped of leading/trailing whitespace before saving.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-1.2.10",
+      "description": "Task descriptions containing embedded newlines are flattened to single-line (newlines replaced with spaces).",
+      "status": "pending"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-1.2.1",
+      "name": "Add first task to empty list",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with empty tasks.json ([])"
+      ],
+      "steps": [
+        "Call tasks.add(storage, 'Buy groceries')"
+      ],
+      "expected_results": [
+        "Returns task with id=1, description='Buy groceries', status='pending'",
+        "created_at is a valid ISO 8601 timestamp",
+        "completed_at is None",
+        "tasks.json now contains one task"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.2.2",
+      "name": "Add task increments ID from existing tasks",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with tasks.json containing one task with id=5"
+      ],
+      "steps": [
+        "Call tasks.add(storage, 'New task')"
+      ],
+      "expected_results": [
+        "Returns task with id=6",
+        "tasks.json now contains two tasks"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.2.3",
+      "name": "Add task with empty description is rejected",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with empty tasks.json"
+      ],
+      "steps": [
+        "Call tasks.add(storage, '')"
+      ],
+      "expected_results": [
+        "Raises ValueError or returns error",
+        "No task is added to tasks.json"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.2.4",
+      "name": "CLI add command end-to-end",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with empty tasks.json"
+      ],
+      "steps": [
+        "Run `python todo.py add 'Buy groceries'` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stdout contains 'Added task 1: Buy groceries'",
+        "Exit code is 0",
+        "tasks.json contains the new task"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.2.5",
+      "name": "Whitespace-only description is rejected",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with empty tasks.json"
+      ],
+      "steps": [
+        "Run `python todo.py add '   '` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Error: Task description cannot be empty.'",
+        "Exit code is 1",
+        "tasks.json remains empty"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.2.6",
+      "name": "Description with quotes and special characters is saved correctly",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with empty tasks.json"
+      ],
+      "steps": [
+        "Call tasks.add(storage, 'Buy \"fancy\" groceries & snacks')"
+      ],
+      "expected_results": [
+        "Task is saved with description intact including quotes and ampersand",
+        "tasks.json is valid JSON"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-1.2.7",
+      "name": "Description with newlines is flattened",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with empty tasks.json"
+      ],
+      "steps": [
+        "Call tasks.add(storage, 'Line one\\nLine two')"
+      ],
+      "expected_results": [
+        "Task description is 'Line one Line two' (newlines replaced with spaces)"
+      ],
+      "status": "pending"
+    }
+  ],
+  "technical_notes": [
+    "Main module: todo.py (entry point)",
+    "Tasks module: todo/tasks.py (business logic)",
+    "Use sys.argv for argument parsing (keep it simple, no argparse yet)",
+    "ID assignment: max(task['id'] for task in tasks) + 1, default to 1",
+    "Use datetime.datetime.now().isoformat() for timestamps",
+    "All success output to stdout, all errors to stderr",
+    "Strip whitespace and replace newlines before saving descriptions",
+    "Use ' '.join(sys.argv[2:]) to support unquoted multi-word descriptions"
+  ],
+  "dependencies": ["US-1.1"],
+  "estimated_hours": 2
+}

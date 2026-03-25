@@ -1,0 +1,210 @@
+{
+  "id": "US-2.2",
+  "title": "Delete a task",
+  "epic": {
+    "id": "epic_2",
+    "name": "Task Management"
+  },
+  "priority": "high",
+  "phase": "m2_management",
+  "story": {
+    "as_a": "user",
+    "i_want_to": "delete a task by its ID",
+    "so_that": "I can remove tasks that are no longer relevant and keep my list clean"
+  },
+  "rationale": "Not all tasks end up being done — some become irrelevant or were added by mistake. Without delete, the task list accumulates noise over time, making it harder to focus on what matters.",
+  "acceptance_criteria": [
+    {
+      "id": "AC-2.2.1",
+      "description": "Running `todo delete 3` removes the task with id=3 from tasks.json.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.2.2",
+      "description": "Before deleting, the app prints 'Delete task {id} [{status}]: {description}? [y/N] ' and waits for confirmation. The status (pending/done) is shown so the user can catch mistakes.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.2.3",
+      "description": "If the user enters 'y' or 'Y', the task is deleted and the app prints 'Deleted task {id}: {description}' to stdout.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.2.4",
+      "description": "If the user enters anything other than y/Y (including just pressing Enter), the app prints 'Cancelled.' to stdout and exits with code 0 without modifying the task list.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.2.5",
+      "description": "Running `todo delete --force 3` or `todo delete -f 3` skips the confirmation prompt and deletes immediately. This supports scripting use cases.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.2.6",
+      "description": "If the task ID does not exist, the app prints 'Error: Task {id} not found.' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.2.7",
+      "description": "Running `todo delete` without an ID prints 'Error: Please provide a task ID. Usage: todo delete <id>' to stderr and exits with code 1.",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.2.8",
+      "description": "Other tasks and their IDs are not affected by the deletion (IDs are stable, not re-assigned).",
+      "status": "pending"
+    },
+    {
+      "id": "AC-2.2.9",
+      "description": "If the provided ID is not a positive integer, the app prints 'Error: Task ID must be a positive number.' to stderr and exits with code 1.",
+      "status": "pending"
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-2.2.1",
+      "name": "Delete existing task with confirmation",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with tasks.json containing tasks id=1 and id=2"
+      ],
+      "steps": [
+        "Call tasks.delete(storage, 1)"
+      ],
+      "expected_results": [
+        "tasks.json contains only task id=2",
+        "Returns deleted task for confirmation message"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.2.2",
+      "name": "Delete non-existent task returns error",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1"
+      ],
+      "steps": [
+        "Call tasks.delete(storage, 99)"
+      ],
+      "expected_results": [
+        "Raises ValueError or returns error indicating task not found"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.2.3",
+      "name": "Delete does not re-assign IDs of remaining tasks",
+      "type": "unit",
+      "preconditions": [
+        "tmp_dir with tasks.json containing tasks id=1, id=2, id=3"
+      ],
+      "steps": [
+        "Call tasks.delete(storage, 2)",
+        "Call tasks.add(storage, 'New task')"
+      ],
+      "expected_results": [
+        "Remaining tasks have id=1 and id=3 (unchanged)",
+        "New task gets id=4 (max existing + 1)"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.2.4",
+      "name": "CLI delete command with confirmation (user enters y)",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1 'Buy groceries' status='pending'"
+      ],
+      "steps": [
+        "Run `python todo.py delete 1` with HOME=tmp_dir, pipe 'y' to stdin"
+      ],
+      "expected_results": [
+        "stdout contains 'Delete task 1 [pending]: Buy groceries? [y/N]'",
+        "stdout contains 'Deleted task 1: Buy groceries'",
+        "Exit code is 0",
+        "tasks.json is now empty []"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.2.5",
+      "name": "CLI delete command cancelled (user enters N)",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1 'Buy groceries'"
+      ],
+      "steps": [
+        "Run `python todo.py delete 1` with HOME=tmp_dir, pipe 'n' to stdin"
+      ],
+      "expected_results": [
+        "stdout contains 'Cancelled.'",
+        "Exit code is 0",
+        "tasks.json still contains task id=1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.2.6",
+      "name": "CLI delete --force skips confirmation",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing task id=1 'Buy groceries'"
+      ],
+      "steps": [
+        "Run `python todo.py delete --force 1` with HOME=tmp_dir (no stdin)"
+      ],
+      "expected_results": [
+        "stdout contains 'Deleted task 1: Buy groceries'",
+        "No confirmation prompt shown",
+        "Exit code is 0",
+        "tasks.json is now empty []"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.2.7",
+      "name": "Non-numeric ID shows error",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with initialized storage"
+      ],
+      "steps": [
+        "Run `python todo.py delete abc` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "stderr contains 'Error: Task ID must be a positive number.'",
+        "Exit code is 1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "TC-2.2.8",
+      "name": "Delete last task then list shows empty state",
+      "type": "integration",
+      "preconditions": [
+        "tmp_dir with tasks.json containing only task id=1"
+      ],
+      "steps": [
+        "Run `python todo.py delete --force 1` with HOME=tmp_dir",
+        "Run `python todo.py list` with HOME=tmp_dir"
+      ],
+      "expected_results": [
+        "First command succeeds with exit code 0",
+        "Second command prints 'No tasks yet. Add one with: todo add \"your task\"'"
+      ],
+      "status": "pending"
+    }
+  ],
+  "technical_notes": [
+    "Use list comprehension to filter out the task: [t for t in tasks if t['id'] != task_id]",
+    "Compare list length before/after to detect if task was actually found",
+    "IDs are never re-used or re-assigned — this is important for consistency",
+    "Parse --force/-f flag from sys.argv before extracting the ID",
+    "Use input() for the confirmation prompt; handle EOFError for piped empty stdin (treat as 'no')",
+    "Show task status in confirmation prompt so user can catch mistakes",
+    "All error messages to stderr, all success messages to stdout"
+  ],
+  "dependencies": ["US-1.2"],
+  "estimated_hours": 1.5
+}
